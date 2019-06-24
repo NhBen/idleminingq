@@ -193,14 +193,22 @@ var prestigelvl = 1;
 
 //allows clicking to make dirt
 function mouseMine(number) {
-    number = number * prestigelvl * 1.25
+    if (prestigelvl == 1) {
+        number = number
+    } else {
+        number = number * prestigelvl * 1.25
+    }
 	dirt = dirt + (number*minelvl);
-  document.getElementById("dirt").innerHTML = round(dirt);
+    document.getElementById("dirt").innerHTML = round(dirt);
 };
 
 //allows clicking to make energy
 function makeEnergy(number) {
-    number = number * prestigelvl * 1.25
+    if (prestigelvl == 1) {
+        number = number
+    } else {
+        number = number * prestigelvl * 1.25
+    }
     if ((energy+(number*energylvl)) < energymax) {
     energy = energy + (number*energylvl);
     document.getElementById("energy").innerHTML = round(energy);
@@ -303,6 +311,11 @@ function prestige() {
         panels = 0;
         pancost = "20 Energy";
         prestigelvl = prestigelvl + 1;
+        if (prestigelvl == 1) {
+            document.getElementById("prestigebonus").innerHTML = 100 + "%";
+        } else {
+            document.getElementById("prestigebonus").innerHTML = prestigelvl*1.25*100 + "%";
+        }
         update();
     };
 };
@@ -321,7 +334,6 @@ function update() {
     document.getElementById("pancost").innerHTML = pancost;
     document.getElementById("prestigelvl").innerHTML = prestigelvl;
     document.getElementById("prestigecost").innerHTML = prestigelvl*1000 + " Dirt";
-    document.getElementById("prestigebonus").innerHTML = prestigelvl*1.25*100 + "%";
 };
 
 //rounds numbers
@@ -344,6 +356,7 @@ function costcheck(cost,cap) {
 
 //stores variables for saving
 function save() {
+    update();
     localStorage.setItem("dirt",JSON.stringify(dirt));
     localStorage.setItem("miners",JSON.stringify(miners));
     localStorage.setItem("minecost",JSON.stringify(minecost));
@@ -370,6 +383,7 @@ function load() {
     panels = JSON.parse(localStorage.getItem("panels"));
     pancost = JSON.parse(localStorage.getItem("pancost"));
     prestigelvl = JSON.parse(localStorage.getItem("prestigelvl"));
+    update();
 };
 
 //auto functions (miners drain energy, panels make energy, prestige production)
