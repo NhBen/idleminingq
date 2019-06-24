@@ -154,11 +154,15 @@ table, td, th {
     </table>
     <br>
 
-    <p><buttton class="special" title="Each prestige increases overall production by a factor of 2, requires 1000 dirt * prestige number" onclick="prestige()">
+    <p><buttton class="special" title="Each prestige increases overall production by a factor of 1.25" onclick="prestige()">
         Prestige
     </buttton>
     <br>
+    Prestige Cost: <span id="prestigecost">1000 Dirt</span>
+    <br>
     Current Prestige: <span id="prestigelvl">1</span>
+    <br>
+    Presige Bonus: <span id="prestigebonus">100%</span>
 
     <br><br>
     <button onclick="save()">
@@ -184,23 +188,26 @@ var energymax = 100;
 var panels = 0;
 var panmax = 10;
 var energylvl = 1;
+var clickmax = 5;
 var prestigelvl = 1;
 
 //allows clicking to make dirt
 function mouseMine(number) {
+    number = number * prestigelvl * 1.25
 	dirt = dirt + (number*minelvl);
   document.getElementById("dirt").innerHTML = round(dirt);
 };
 
 //allows clicking to make energy
 function makeEnergy(number) {
+    number = number * prestigelvl * 1.25
     if ((energy+(number*energylvl)) < energymax) {
     energy = energy + (number*energylvl);
     document.getElementById("energy").innerHTML = round(energy);
     } else {
     energy = energymax;
     document.getElementById("energy").innerHTML = round(energy);
-    }
+    };
 };
 
 //makes miners drain energy
@@ -209,7 +216,7 @@ function drainEnergy() {
     energy = energy - (miners / 2);
     mouseMine(miners);
     document.getElementById("energy").innerHTML = round(energy);
-    }
+    };
 };
 
 //purchases miners and increases costs
@@ -224,21 +231,24 @@ function buyMiner() {
         document.getElementById("minecost").innerHTML = nextcost + " Dirt";
         if (miners == minemax) {
             document.getElementById("minecost").innerHTML = "Maxed";
-        }
-    }
+        };
+    };
 };
 
 //upgrades clicks that make dirt
 function upgMine() {
 	var clickcost = Math.floor(20 + Math.pow(minelvl,2));
-    if(dirt >= clickcost && minelvl < 5) {
+    if(dirt >= clickcost && minelvl < clickmax) {
         minelvl = minelvl + 1;
         dirt = dirt - clickcost;
         document.getElementById("minelvl").innerHTML = round(minelvl);
         document.getElementById("dirt").innerHTML = round(dirt);
+        var nextcost = Math.floor(20 + Math.pow(minelvl,2));
+        document.getElementById("clickcost").innerHTML = nextcost + " Dirt";
+        if (minelvl == clickmax) {
+            document.getElementById("clickcost").innerHTML = "Maxed";
+        };
     };
-    var nextcost = Math.floor(20 + Math.pow(minelvl,2));
-    document.getElementById("clickcost").innerHTML = nextcost + " Dirt";
 };
 
 //upgrades clicks that make energy
@@ -249,9 +259,12 @@ function upgEnergy() {
         energy = energy - energycost;
         document.getElementById("energylvl").innerHTML = round(energylvl);
         document.getElementById("energy").innerHTML = round(energy);
+        var nextcost = Math.floor(20 + Math.pow(energylvl,2));
+        document.getElementById("energycost").innerHTML = nextcost + " Energy";
+        if (energylvl == clickmax) {
+            document.getElementById("energycost").innerHTML = "Maxed";
+        };
     };
-    var nextcost = Math.floor(20 + Math.pow(energylvl,2));
-    document.getElementById("energycost").innerHTML = nextcost + " Energy";
 };
 
 //buys solar panels
@@ -268,11 +281,11 @@ function buyPanel() {
             document.getElementById("pancost").innerHTML = energymax + " Energy";
         } else {
             document.getElementById("pancost").innerHTML = nextcost + " Energy";
-        }
+        };
         if (panels == panmax) {
             document.getElementById("pancost").innerHTML = "Maxed";
-        }
-    }
+        };
+    };
 };
 
 //allows prestiging for a bonus
@@ -281,19 +294,34 @@ function prestige() {
     if (dirt >= prestigecost) {
         dirt = 0;
         miners = 0;
+        minecost = "10 Dirt";
         minelvl = 1;
+        clickcost = "20 Dirt";
         energy = 0;
-        panels = 0;
         energylvl = 1;
+        energycost = "20 Energy";
+        panels = 0;
+        pancost = "20 Energy";
         prestigelvl = prestigelvl + 1;
-        document.getElementById("prestigelvl").innerHTML = prestigelvl;
-    }
+        update();
+    };
 };
 
-//multiplies production by prestige
-function apprestige() {
-    dirt = dirt * prestigelvl;
-    energy = energy * prestigelvl;
+//updates values
+function update() {
+    document.getElementById("dirt").innerHTML = round(dirt);
+    document.getElementById("miners").innerHTML = round(miners);
+    document.getElementById("minecost").innerHTML = minecost;
+    document.getElementById("minelvl").innerHTML = round(minelvl);
+    document.getElementById("clickcost").innerHTML = clickcost;
+    document.getElementById("energy").innerHTML = round(energy);
+    document.getElementById("energylvl").innerHTML = round(energylvl);
+    document.getElementById("energycost").innerHTML = energycost;
+    document.getElementById("panels").innerHTML = round(panels);
+    document.getElementById("pancost").innerHTML = pancost;
+    document.getElementById("prestigelvl").innerHTML = prestigelvl;
+    document.getElementById("prestigecost").innerHTML = prestigelvl*1000 + " Dirt";
+    document.getElementById("prestigebonus").innerHTML = prestigelvl*1.25*100 + "%";
 };
 
 //rounds numbers
@@ -311,30 +339,47 @@ function costcheck(cost,cap) {
         return cost;
     } else {
         return cost;
-    }
+    };
 };
 
 //stores variables for saving
 function save() {
     localStorage.setItem("dirt",JSON.stringify(dirt));
     localStorage.setItem("miners",JSON.stringify(miners));
+    localStorage.setItem("minecost",JSON.stringify(minecost));
+    localStorage.setItem("minelvl",JSON.stringify(minelvl));
+    localStorage.setItem("clickcost",JSON.stringify(clickcost));
+    localStorage.setItem("energy",JSON.stringify(energy));
+    localStorage.setItem("energylvl",JSON.stringify(energylvl));
+    localStorage.setItem("energycost",JSON.stringify(energycost));
+    localStorage.setItem("panels",JSON.stringify(panels));
+    localStorage.setItem("pancost",JSON.stringify(pancost));
+    localStorage.setItem("prestigelvl",JSON.stringify(prestigelvl));
 };
 
 //loads game
 function load() {
     dirt = JSON.parse(localStorage.getItem("dirt"));
     miners = JSON.parse(localStorage.getItem("miners"));
+    minecost = JSON.parse(localStorage.getItem("minecost"));
+    minelvl = JSON.parse(localStorage.getItem("minelvl"));
+    clickcost = JSON.parse(localStorage.getItem("clickcost"));
+    energy = JSON.parse(localStorage.getItem("energy"));
+    energylvl = JSON.parse(localStorage.getItem("energylvl"));
+    energycost = JSON.parse(localStorage.getItem("energycost"));
+    panels = JSON.parse(localStorage.getItem("panels"));
+    pancost = JSON.parse(localStorage.getItem("pancost"));
+    prestigelvl = JSON.parse(localStorage.getItem("prestigelvl"));
 };
 
 //auto functions (miners drain energy, panels make energy, prestige production)
 window.setInterval(function() {
     drainEnergy();
     makeEnergy(panels/2);
-    apprestige();
 }, 1000);
 
 //how often to autosave
 window.setInterval(function() {
 	save();
-}, 120000);
+}, 60000);
 </script>
