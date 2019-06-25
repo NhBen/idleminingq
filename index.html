@@ -96,6 +96,12 @@ table, td, th {
 <body>
     <table>
         <tr><th>
+    Dirt per second: <span id="dirtick">0</span>
+    <br>
+    Energy per second: <span id="energytick">0</span>
+        </th>
+
+        <th>
     Dirt: <span id="dirt">0</span>
     <br>
     <button class="button" onclick="mouseMine(1)">
@@ -122,6 +128,8 @@ table, td, th {
     <br>
     Cost: <span id="minecost">10 Dirt</span>
         </th></tr>
+
+        <td></td>
 
         <td>
     Energy: <span id="energy">0</span>/100
@@ -189,42 +197,58 @@ var panels = 0;
 var panmax = 10;
 var energylvl = 1;
 var clickmax = 5;
+var dticks = 0;
+var eticks = 0;
 var prestigelvl = 1;
 
 //allows clicking to make dirt
 function mouseMine(number) {
     if (prestigelvl == 1) {
-        number = number
+        number = number * minelvl;
     } else {
-        number = number * prestigelvl * 1.25
-    }
-	dirt = dirt + (number*minelvl);
-    document.getElementById("dirt").innerHTML = round(dirt);
+        number = number * minelvl * prestigelvl * 1.25;
+    };
+	dirt = dirt + number;
+    document.getElementById("dirt").innerHTML = Math.ceil(dirt);
+    dticks = dticks + number;
 };
 
 //allows clicking to make energy
 function makeEnergy(number) {
     if (prestigelvl == 1) {
-        number = number
+        number = number * energylvl;
     } else {
-        number = number * prestigelvl * 1.25
-    }
+        number = number * energylvl * prestigelvl * 1.25;
+    };
     if ((energy+(number*energylvl)) < energymax) {
-    energy = energy + (number*energylvl);
-    document.getElementById("energy").innerHTML = round(energy);
+    energy = energy + number;
     } else {
     energy = energymax;
-    document.getElementById("energy").innerHTML = round(energy);
     };
+    document.getElementById("energy").innerHTML = round(energy);
+    eticks = eticks + number;
 };
 
 //makes miners drain energy
 function drainEnergy() {
     if (energy >= miners/2) {
-    energy = energy - (miners / 2);
+    energy = energy - (miners/2);
+    eticks = eticks - (miners/2);
     mouseMine(miners);
     document.getElementById("energy").innerHTML = round(energy);
     };
+};
+
+//outputs current production of dirt
+function dticker() {
+    document.getElementById("dirtick").innerHTML = dticks;
+    dticks = 0;
+};
+
+//outputs current production of energy
+function eticker() {
+    document.getElementById("energytick").innerHTML = round(eticks);
+    eticks = 0;
 };
 
 //purchases miners and increases costs
@@ -233,8 +257,8 @@ function buyMiner() {
     if(dirt >= minecost && miners < minemax) {
         miners = miners + 1;
         dirt = dirt - minecost;
-        document.getElementById("miners").innerHTML = round(miners);
-        document.getElementById("dirt").innerHTML = round(dirt);
+        document.getElementById("miners").innerHTML = miners;
+        document.getElementById("dirt").innerHTML = Math.ceil(dirt);
         var nextcost = Math.floor(10 + Math.pow(miners,2));
         document.getElementById("minecost").innerHTML = nextcost + " Dirt";
         if (miners == minemax) {
@@ -249,8 +273,8 @@ function upgMine() {
     if(dirt >= clickcost && minelvl < clickmax) {
         minelvl = minelvl + 1;
         dirt = dirt - clickcost;
-        document.getElementById("minelvl").innerHTML = round(minelvl);
-        document.getElementById("dirt").innerHTML = round(dirt);
+        document.getElementById("minelvl").innerHTML = minelvl;
+        document.getElementById("dirt").innerHTML = Math.ceil(dirt);
         var nextcost = Math.floor(20 + Math.pow(minelvl,2));
         document.getElementById("clickcost").innerHTML = nextcost + " Dirt";
         if (minelvl == clickmax) {
@@ -265,7 +289,7 @@ function upgEnergy() {
     if(energy >= energycost && energylvl < 5) {
         energylvl = energylvl + 1;
         energy = energy - energycost;
-        document.getElementById("energylvl").innerHTML = round(energylvl);
+        document.getElementById("energylvl").innerHTML = energylvl;
         document.getElementById("energy").innerHTML = round(energy);
         var nextcost = Math.floor(20 + Math.pow(energylvl,2));
         document.getElementById("energycost").innerHTML = nextcost + " Energy";
@@ -282,7 +306,7 @@ function buyPanel() {
     if(energy >= pancost && panels < panmax) {
         panels = panels + 1;
         energy = energy - pancost;
-        document.getElementById("panels").innerHTML = round(panels);
+        document.getElementById("panels").innerHTML = panels;
         document.getElementById("energy").innerHTML = round(energy);
         var nextcost = Math.floor(20 + Math.pow(panels,2));
         if (costcheck(nextcost,energymax) == energymax) {
@@ -315,22 +339,22 @@ function prestige() {
             document.getElementById("prestigebonus").innerHTML = 100 + "%";
         } else {
             document.getElementById("prestigebonus").innerHTML = prestigelvl*1.25*100 + "%";
-        }
+        };
         update();
     };
 };
 
 //updates values
 function update() {
-    document.getElementById("dirt").innerHTML = round(dirt);
-    document.getElementById("miners").innerHTML = round(miners);
+    document.getElementById("dirt").innerHTML = dirt;
+    document.getElementById("miners").innerHTML = miners;
     document.getElementById("minecost").innerHTML = minecost;
-    document.getElementById("minelvl").innerHTML = round(minelvl);
+    document.getElementById("minelvl").innerHTML = minelvl;
     document.getElementById("clickcost").innerHTML = clickcost;
     document.getElementById("energy").innerHTML = round(energy);
-    document.getElementById("energylvl").innerHTML = round(energylvl);
+    document.getElementById("energylvl").innerHTML = energylvl;
     document.getElementById("energycost").innerHTML = energycost;
-    document.getElementById("panels").innerHTML = round(panels);
+    document.getElementById("panels").innerHTML = panels;
     document.getElementById("pancost").innerHTML = pancost;
     document.getElementById("prestigelvl").innerHTML = prestigelvl;
     document.getElementById("prestigecost").innerHTML = prestigelvl*1000 + " Dirt";
@@ -341,7 +365,10 @@ function round(input) {
     input = input * 10;
     var output = Math.round(input * 1000000)/1000000;
     output = output / 10;
-        return output;
+    if (output.toString().length < 3) {
+        output = output + ".0"
+    };
+    return output;
 };
 
 //check max cost of product
@@ -386,10 +413,12 @@ function load() {
     update();
 };
 
-//auto functions (miners drain energy, panels make energy, prestige production)
+//auto functions (miners drain energy, panels make energy)
 window.setInterval(function() {
     drainEnergy();
     makeEnergy(panels/2);
+    dticker();
+    eticker();
 }, 1000);
 
 //how often to autosave
