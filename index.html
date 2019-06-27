@@ -72,10 +72,11 @@ p {
 }
 
 table {
+  table-layout: fixed;
   border-collapse: collapse;
   margin-left: auto;
   margin-right: auto;
-  width: 50%;
+  width: 70%;
   font-size: 1.3em;
 }
 
@@ -116,7 +117,7 @@ table, td, th {
     <br>
     Level: <span id="minelvl">1</span>/5
     <br>
-    Cost: <span id="clickcost">20 Dirt</span>
+    Cost: <span id="clickcost">21 Dirt</span>
         </th>
 
         <th>
@@ -127,6 +128,8 @@ table, td, th {
     Miners: <span id="miners">0</span>/50
     <br>
     Cost: <span id="minecost">10 Dirt</span>
+    <br>
+    <input type="checkbox" id="mineron" checked> Enable/Disable Miners
         </th></tr>
 
         <td></td>
@@ -146,7 +149,7 @@ table, td, th {
     <br>
     Level: <span id="energylvl">1</span>/5
     <br>
-    Cost: <span id="energycost">20 Energy</span>
+    Cost: <span id="energycost">21 Energy</span>
         </td>
 
         <td>
@@ -162,7 +165,7 @@ table, td, th {
     </table>
     <br>
 
-    <p><buttton class="special" title="Each prestige increases overall production by a factor of 1.25" onclick="prestige()">
+    <p><buttton class="special" title="Each prestige increases overall production by 100%" onclick="prestige()">
         Prestige
     </buttton>
     <br>
@@ -170,7 +173,7 @@ table, td, th {
     <br>
     Current Prestige: <span id="prestigelvl">1</span>
     <br>
-    Presige Bonus: <span id="prestigebonus">100%</span>
+    Prestige Bonus: <span id="prestigebonus">100%</span>
 
     <br><br>
     <button title="Disabled because of bugs" disabled onclick="save()">
@@ -206,7 +209,7 @@ function mouseMine(number) {
     if (prestigelvl == 1) {
         number = number * minelvl;
     } else {
-        number = number * minelvl * prestigelvl * 1.25;
+        number = number * minelvl * prestigelvl;
     };
 	dirt = dirt + number;
     document.getElementById("dirt").innerHTML = Math.ceil(dirt);
@@ -218,7 +221,7 @@ function makeEnergy(number) {
     if (prestigelvl == 1) {
         number = number * energylvl;
     } else {
-        number = number * energylvl * prestigelvl * 1.25;
+        number = number * energylvl * prestigelvl;
     };
     if ((energy+(number*energylvl)) < energymax) {
     energy = energy + number;
@@ -231,7 +234,7 @@ function makeEnergy(number) {
 
 //makes miners drain energy
 function drainEnergy() {
-    if (energy >= miners/2) {
+    if (energy >= miners/2 && document.getElementById("mineron").checked == true) {
     energy = energy - (miners/2);
     eticks = eticks - (miners/2);
     mouseMine(miners);
@@ -253,13 +256,13 @@ function eticker() {
 
 //purchases miners and increases costs
 function buyMiner() {
-	var minecost = Math.floor(10 + Math.pow(miners,2));
+	var minecost = Math.floor(10 + Math.pow(miners,1.9));
     if(dirt >= minecost && miners < minemax) {
         miners = miners + 1;
         dirt = dirt - minecost;
         document.getElementById("miners").innerHTML = miners;
         document.getElementById("dirt").innerHTML = Math.ceil(dirt);
-        var nextcost = Math.floor(10 + Math.pow(miners,2));
+        var nextcost = Math.floor(10 + Math.pow(miners,1.9));
         document.getElementById("minecost").innerHTML = nextcost + " Dirt";
         if (miners == minemax) {
             document.getElementById("minecost").innerHTML = "Maxed";
@@ -269,13 +272,13 @@ function buyMiner() {
 
 //upgrades clicks that make dirt
 function upgMine() {
-	var clickcost = Math.floor(20 + Math.pow(minelvl,2));
+	var clickcost = Math.floor(20 + Math.pow(minelvl,3));
     if(dirt >= clickcost && minelvl < clickmax) {
         minelvl = minelvl + 1;
         dirt = dirt - clickcost;
         document.getElementById("minelvl").innerHTML = minelvl;
         document.getElementById("dirt").innerHTML = Math.ceil(dirt);
-        var nextcost = Math.floor(20 + Math.pow(minelvl,2));
+        var nextcost = Math.floor(20 + Math.pow(minelvl,3));
         document.getElementById("clickcost").innerHTML = nextcost + " Dirt";
         if (minelvl == clickmax) {
             document.getElementById("clickcost").innerHTML = "Maxed";
@@ -285,13 +288,13 @@ function upgMine() {
 
 //upgrades clicks that make energy
 function upgEnergy() {
-	var energycost = Math.floor(20 + Math.pow(energylvl,2));
+	var energycost = Math.floor(20 + Math.pow(energylvl,3));
     if(energy >= energycost && energylvl < 5) {
         energylvl = energylvl + 1;
         energy = energy - energycost;
         document.getElementById("energylvl").innerHTML = energylvl;
         document.getElementById("energy").innerHTML = round(energy);
-        var nextcost = Math.floor(20 + Math.pow(energylvl,2));
+        var nextcost = Math.floor(20 + Math.pow(energylvl,3));
         document.getElementById("energycost").innerHTML = nextcost + " Energy";
         if (energylvl == clickmax) {
             document.getElementById("energycost").innerHTML = "Maxed";
@@ -322,24 +325,20 @@ function buyPanel() {
 
 //allows prestiging for a bonus
 function prestige() {
-    var prestigecost = Math.floor(1000*prestigelvl);
+    var prestigecost = presround(1000 * Math.pow(prestigelvl,1.4));
     if (dirt >= prestigecost) {
         dirt = 0;
         miners = 0;
         minecost = "10 Dirt";
         minelvl = 1;
-        clickcost = "20 Dirt";
+        clickcost = "21 Dirt";
         energy = 0;
         energylvl = 1;
-        energycost = "20 Energy";
+        energycost = "21 Energy";
         panels = 0;
         pancost = "20 Energy";
         prestigelvl = prestigelvl + 1;
-        if (prestigelvl == 1) {
-            document.getElementById("prestigebonus").innerHTML = 100 + "%";
-        } else {
-            document.getElementById("prestigebonus").innerHTML = prestigelvl*1.25*100 + "%";
-        };
+        document.getElementById("prestigebonus").innerHTML = prestigelvl*100 + "%";
         update();
     };
 };
@@ -357,17 +356,21 @@ function update() {
     document.getElementById("panels").innerHTML = panels;
     document.getElementById("pancost").innerHTML = pancost;
     document.getElementById("prestigelvl").innerHTML = prestigelvl;
-    document.getElementById("prestigecost").innerHTML = prestigelvl*1000 + " Dirt";
+    document.getElementById("prestigecost").innerHTML = presround(1000 * Math.pow(prestigelvl,1.4)) + " Dirt";
 };
 
 //rounds numbers
 function round(input) {
-    input = input * 10;
     var output = Math.round(input * 1000000)/1000000;
-    output = output / 10;
     if (output.toString().length < 3) {
         output = output + ".0"
     };
+    return output;
+};
+
+//rounds to thousands
+function presround(input) {
+    var output = Math.round(input / 1000)*1000;
     return output;
 };
 
