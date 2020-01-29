@@ -169,7 +169,7 @@ table, td, th {
         Prestige
     </buttton>
     <br>
-    Prestige Cost: <span id="prestigecost">1000 Dirt</span>
+    Prestige Cost: <span id="prestigecost">0 Dirt</span>
     <br>
     Current Prestige: <span id="prestigelvl">1</span>
     <br>
@@ -325,7 +325,7 @@ function buyPanel() {
 
 //allows prestiging for a bonus
 function prestige() {
-    var prestigecost = presround(1000 * Math.pow(prestigelvl,1.4));
+    var prestigecost = presround(0 * Math.pow(prestigelvl,1.4));
     if (dirt >= prestigecost) {
         dirt = 0;
         miners = 0;
